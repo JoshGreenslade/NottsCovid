@@ -1,6 +1,6 @@
 import json
 import dash
-from src import dataCtrl, uiCtrl
+import dataCtrl
 
 # Load in configuration
 with open('./config/nottsConfig.json', 'r') as f:
@@ -8,11 +8,8 @@ with open('./config/nottsConfig.json', 'r') as f:
 
 # Init the app
 app = dash.Dash(__name__)
-
 data_ctrl = dataCtrl.DataCtrl()
-
-ui_ctrl = uiCtrl.UiCtrl(data_ctrl, app)
-
+server = app.server
 
 # Run the app
 if __name__ == '__main__':

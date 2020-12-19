@@ -1,6 +1,7 @@
 import datetime
 import json
 import requests
+from pandas import json_normalize
 
 # Load in configuration
 with open('./config/nottsConfig.json', 'r') as f:
@@ -22,6 +23,15 @@ class DataCtrl:
         time_now = datetime.datetime.utcnow()
         if (time_now - self.last_updated > datetime.timedelta(days=1)):
             self.update_data()
+
+        # Init the geojson
+        with open('./data/nottsGeoJSON.json') as geofile:
+            geojson = json.load(geofile)
+            i = 0
+            for feature in geojson["features"]:
+                feature['id'] = feature['properties']['msoa01cd']
+                i += 1
+        self.geojson = geojson
 
     def update_data(self):
         """ Updates the local and stored data from the API """
@@ -46,4 +56,8 @@ class DataCtrl:
 
     def get_data_for_area(self, area_code):
         filter = f'filters=&areaType=msoa&areaCode={area_code}'
-        return self.get(filter=filter)
+        data = self.get(filter=filter)
+        if data is not None:
+            df = json_normalize(data,
+                                meta=['areaCode', 'areaName', 'UtlaName'])
+        return df
