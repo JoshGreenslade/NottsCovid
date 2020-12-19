@@ -1,5 +1,6 @@
 import datetime
 import json
+import requests
 
 # Load in configuration
 with open('./config/nottsConfig.json', 'r') as f:
@@ -31,3 +32,18 @@ class DataCtrl:
 
         with open('./config/nottsConfig.json', 'w') as f:
             json.dump(config, f, indent=4)
+
+    def get(self, filter='', structure=''):
+        """ Get data from the endpoint with the given filters and structure"""
+
+        payload = ''.join([self.endpoint, filter, structure])
+        r = requests.get(payload)
+        if r.status_code == 200:
+            json_data = r.json()
+            return json_data
+        else:
+            pass
+
+    def get_data_for_area(self, area_code):
+        filter = f'filters=&areaType=msoa&areaCode={area_code}'
+        return self.get(filter=filter)

@@ -7,7 +7,7 @@ with open('./config/nottsConfig.json', 'r') as f:
     config = json.load(f)
 
 data_ctrl = dataCtrl.DataCtrl()
-data_ctrl.update_data()
+print(data_ctrl.get_data_for_area('E02006905'))
 
 # Init the app
 app = dash.Dash(__name__)
