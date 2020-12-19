@@ -40,6 +40,7 @@
         "E02006905"
     ],
     "debug": true,
-    "lastUpdated": "2020-12-19 12:17:05"
+    "lastUpdated": "2020-12-19 12:17:05",
+    "geojsonPath": "./data/nottsGeoJSON.json"
 }
 
