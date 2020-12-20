@@ -1,6 +1,7 @@
 import datetime
 import json
 import requests
+import pandas as pd
 from pandas import json_normalize
 
 # Load in configuration
@@ -25,12 +26,14 @@ class DataCtrl:
             self.update_data()
 
         # Init the geojson
-        with open('./data/nottsGeoJSON.json') as geofile:
+        with open(config['geojsonPath']) as geofile:
             geojson = json.load(geofile)
-            i = 0
+
+            # These next lines ensure the geography shows up on maps
+            # Something to do with dash expecting an ID column.
             for feature in geojson["features"]:
-                feature['id'] = feature['properties']['msoa01cd']
-                i += 1
+                feature['id'] = feature['properties']['msoa11cd']
+
         self.geojson = geojson
 
     def update_data(self):
@@ -55,9 +58,33 @@ class DataCtrl:
             pass
 
     def get_data_for_area(self, area_code):
+        """Query the API for the msoa details on a given area code
+
+        :param area_code: The area code to query
+        :type area_code: str
+        :return: A pandas DataFrame
+        :rtype: pd.DataFrame
+        """
+
         filter = f'filters=&areaType=msoa&areaCode={area_code}'
         data = self.get(filter=filter)
         if data is not None:
             df = json_normalize(data,
                                 meta=['areaCode', 'areaName', 'UtlaName'])
+        else:
+            return None
+        return df
+
+    def get_data_for_all_areas(self):
+        """Query the API for all area codes. Return a dataframe.
+
+        :return: A pandas dataframe containing all the API information
+        :rtype: pd.DataFrame
+        """
+
+        df_list = []
+        for area_code in config['areaCodes']:
+            print(area_code)
+            df_list.append(self.get_data_for_area(area_code))
+        df = pd.concat(df_list)
         return df

@@ -9,12 +9,13 @@ import plotly.express as px
     Output('map-figure', 'figure'),
     Input('dropdown', 'value'))
 def display_value(value):
-    df = data_ctrl.get_data_for_area(value)
+    df = data_ctrl.get_data_for_all_areas()
+    print(df)
     fig = px.choropleth_mapbox(df,
                                geojson=data_ctrl.geojson,
                                color="latest.newCasesBySpecimenDate.rollingRate",
                                locations="areaCode",
-                               featureidkey="properties.msoa01cd",
+                               featureidkey="properties.msoa11cd",
                                center={'lat': 52.88902922895685,
                                        'lon': -1.246953174103217},
                                zoom=9,
