@@ -18,31 +18,35 @@ class DataCtrl:
 
         self.endpoint = 'https://coronavirus.data.gov.uk/api/v1/soa?'
 
-        self.last_updated = datetime.datetime.strptime(
+        # Update the data if needed.
+        last_updated = datetime.datetime.strptime(
             config['lastUpdated'], self.time_format)
-
         time_now = datetime.datetime.utcnow()
-        if (time_now - self.last_updated > datetime.timedelta(days=1)):
+        if (time_now - last_updated > datetime.timedelta(days=1)):
             self.update_data()
+
+        # Get the data
+        self.data = pd.read_csv('./data/nottsData.csv')
 
         # Init the geojson
         with open(config['geojsonPath']) as geofile:
             geojson = json.load(geofile)
-
             # These next lines ensure the geography shows up on maps
             # Something to do with dash expecting an ID column.
             for feature in geojson["features"]:
                 feature['id'] = feature['properties']['msoa11cd']
-
         self.geojson = geojson
 
     def update_data(self):
         """ Updates the local and stored data from the API """
 
+        # Get the new data
+        data = self.get_data_for_all_areas()
+        data.to_csv('./data/nottsData.csv')
+
+        # Update the config file
         time_now = datetime.datetime.utcnow()
-
         config['lastUpdated'] = time_now.strftime(self.time_format)
-
         with open('./config/nottsConfig.json', 'w') as f:
             json.dump(config, f, indent=4)
 

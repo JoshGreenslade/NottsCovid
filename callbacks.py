@@ -6,21 +6,7 @@ import plotly.express as px
 
 
 @app.callback(
-    Output('map-figure', 'figure'),
-    Input('dropdown', 'value'))
-def display_value(value):
-    df = data_ctrl.get_data_for_all_areas()
-    print(df)
-    fig = px.choropleth_mapbox(df,
-                               geojson=data_ctrl.geojson,
-                               color="latest.newCasesBySpecimenDate.rollingRate",
-                               locations="areaCode",
-                               featureidkey="properties.msoa11cd",
-                               center={'lat': 52.88902922895685,
-                                       'lon': -1.246953174103217},
-                               zoom=9,
-                               opacity=0.4)
-    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
-                      mapbox_accesstoken='pk.eyJ1IjoiamdyZWVuc2xhZGUiLCJhIjoiY2tpcnJqOWF6MGs3dTMwb2JyYWN4MzNtZCJ9.M8BhWR_plOZDW2v8UaZeJA')
-    fig.update(layout_coloraxis_showscale=False)
-    return fig
+    Output('readout', 'children'),
+    Input('map-figure', 'hoverData'))
+def display_hover_data(hover_data):
+    return json.dumps(hover_data['points'][0]['location'], indent=2)
