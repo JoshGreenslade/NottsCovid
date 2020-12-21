@@ -19,6 +19,7 @@ map_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
                       mapbox_accesstoken='pk.eyJ1IjoiamdyZWVuc2xhZGUiLCJhIjoiY2tpcnJqOWF6MGs3dTMwb2JyYWN4MzNtZCJ9.M8BhWR_plOZDW2v8UaZeJA')
 map_fig.update(layout_coloraxis_showscale=False)
 
+
 layout1 = html.Div([
     html.Div([
         dcc.Graph(id='map-figure', figure=map_fig),
@@ -27,10 +28,14 @@ layout1 = html.Div([
     ], className='g'),
     html.Div([
         dash_table.DataTable(
-            id='datatable'
+            id='datatable',
+            data=[]
         )
-    ]),
+    ], className='dataTable'),
     html.Div([
         html.Pre(id='readout')
+    ]),
+    html.Div([
+        dcc.Graph(id='rolling-figure')
     ]),
 ])
