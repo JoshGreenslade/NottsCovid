@@ -3,6 +3,7 @@ import json
 import requests
 import pandas as pd
 from pandas import json_normalize
+import ast
 
 # Load in configuration
 with open('./config/nottsConfig.json', 'r') as f:
@@ -27,6 +28,23 @@ class DataCtrl:
 
         # Get the data
         self.data = pd.read_csv('./data/nottsData.csv')
+
+        # Get the data as a time-series
+        df = self.data
+        df['newCasesBySpecimenDate'] = df['newCasesBySpecimenDate'].apply(
+            ast.literal_eval)
+        df_list = []
+        for idx, row in df.iterrows():
+            i = pd.DataFrame(row['newCasesBySpecimenDate'])
+            i['areaName'] = row['areaName']
+            i['areaCode'] = row['areaCode']
+            i['UtlaCode'] = row['UtlaCode']
+            i['UtlaName'] = row['UtlaName']
+            i['LtlaCode'] = row['LtlaCode']
+            i['LtlaName'] = row['LtlaName']
+            i['date'] = pd.to_datetime(i['date'])
+            df_list.append(i)
+        self.time_series = pd.concat(df_list)
 
         # Init the geojson
         with open(config['geojsonPath']) as geofile:

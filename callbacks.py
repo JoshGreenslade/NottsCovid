@@ -4,6 +4,7 @@ import json
 from app import app, data_ctrl
 import ast
 import plotly.express as px
+import plotly.graph_objs as go
 
 # Map the columns to the data
 cols = [{"id": "areaName", "name": "Name"},
@@ -47,18 +48,40 @@ def display_hover_data(hover_data):
     Input('map-figure', 'hoverData'))
 def display_rolling_figure(hover_data):
 
-    row = get_row_from_hover(hover_data)
-    cases_by_date = row['newCasesBySpecimenDate']
-    data = pd.DataFrame(ast.literal_eval(cases_by_date))
-    data['date'] = pd.to_datetime(data['date'])
+    # Get the time-series data
+    time_series_data = data_ctrl.time_series
+    mean_cases = time_series_data.groupby('date').mean().reset_index()
 
-    figure = px.line(x=data['date'],
-                     y=data['rollingRate'],
-                     labels={'x': 'Date', 'y': 'Cases per 100k population'})
+    # Get the latest-case data for that row
+    area_code = hover_data['points'][0]['location']
+    data = time_series_data[time_series_data['areaCode'] == area_code]
 
+    figure = go.Figure()
+    figure.add_trace(go.Scatter(x=data['date'],
+                                y=data['rollingRate'],
+                                name=data['areaName'].unique()[0],
+                                mode='lines+markers',
+                                marker=dict(color='green', size=10),
+                                line=dict(color='green')))
+    figure.add_trace(go.Scatter(x=mean_cases['date'],
+                                y=mean_cases['rollingRate'],
+                                mode='lines',
+                                name='Nottinghamshire Average',
+                                line=dict(color='blue')))
+
+    figure.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
     figure.layout.yaxis.range = [0, 1200]
+    figure.layout.yaxis.dtick = 200
     figure.layout.xaxis.range = [
         pd.to_datetime('2020-08-01'), data['date'].max()]
-    figure.update_traces(mode='lines+markers')
+
+    figure.update_layout(plot_bgcolor='white')
+    figure.update_yaxes(showgrid=True, zeroline=True,
+                        gridcolor='#CCCCCC', showline=True)
+    figure.update_layout(legend=dict(yanchor="top",
+                                     y=0.99,
+                                     xanchor="left",
+                                     x=0.01
+                                     ))
 
     return figure
